@@ -1,0 +1,59 @@
+`timescale 1ns / 1ps
+
+module library_management(
+    input clk,
+    input reset,
+
+    input [2:0] user_id,
+    input [2:0] book_id,
+    input issue,
+    input return_book,
+
+    output reg valid_user,
+    output reg valid_book,
+    output reg issue_done,
+    output reg return_done,
+    output reg [7:0] available_books
+);
+
+    reg [7:0] book_status;
+
+    always @(posedge reset) begin
+        book_status <= 8'b11111111;
+        available_books <= 8'b11111111;
+
+        valid_user <= 0;
+        valid_book <= 0;
+        issue_done <= 0;
+        return_done <= 0;
+    end
+
+    always @(posedge clk) begin
+
+        valid_user <= 1;
+        valid_book <= 1;
+        issue_done <= 0;
+        return_done <= 0;
+
+        if (user_id > 7)
+            valid_user <= 0;
+
+        if (book_id > 7)
+            valid_book <= 0;
+
+        if (issue && valid_user && valid_book) begin
+            if (book_status[book_id] == 1)
+                book_status[book_id] <= 0;
+                issue_done <= 1;
+        end
+
+        if (return_book && valid_user && valid_book) begin
+            if (book_status[book_id] == 0)
+                book_status[book_id] <= 1;
+                return_done <= 1;
+        end
+
+        available_books <= book_status;
+    end
+
+endmodule

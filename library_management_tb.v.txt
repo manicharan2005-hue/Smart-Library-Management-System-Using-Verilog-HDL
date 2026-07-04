@@ -1,0 +1,87 @@
+`timescale 1ns / 1ps
+
+module library_management_tb;
+
+    reg clk;
+    reg reset;
+    reg [2:0] user_id;
+    reg [2:0] book_id;
+    reg issue;
+    reg return_book;
+
+    wire valid_user;
+    wire valid_book;
+    wire issue_done;
+    wire return_done;
+    wire [7:0] available_books;
+
+    library_management dut (
+        .clk(clk),
+        .reset(reset),
+        .user_id(user_id),
+        .book_id(book_id),
+        .issue(issue),
+        .return_book(return_book),
+        .valid_user(valid_user),
+        .valid_book(valid_book),
+        .issue_done(issue_done),
+        .return_done(return_done),
+        .available_books(available_books)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+
+        clk = 0;
+        reset = 0;
+        user_id = 0;
+        book_id = 0;
+        issue = 0;
+        return_book = 0;
+
+        #10 reset = 1;
+        #10 reset = 0;
+
+        $display("Simulation Started");
+
+        // TEST 1
+        #10;
+        user_id = 3;
+        book_id = 2;
+        issue = 1;
+        #10 issue = 0;
+
+        $display("TEST1 available=%b issue_done=%b", available_books, issue_done);
+
+        // TEST 2
+        #10 return_book = 1;
+        #10 return_book = 0;
+
+        $display("TEST2 available=%b return_done=%b", available_books, return_done);
+
+        // TEST 3 invalid user
+        #10 user_id = 8; book_id = 1; issue = 1;
+        #10 issue = 0;
+
+        $display("TEST3 valid_user=%b", valid_user);
+
+        // TEST 4 invalid book
+        #10 user_id = 2; book_id = 9; issue = 1;
+        #10 issue = 0;
+
+        $display("TEST4 valid_book=%b", valid_book);
+
+        // TEST 5
+        #10 user_id = 1; book_id = 2; issue = 1;
+        #10 issue = 0;
+
+        $display("TEST5 available=%b", available_books);
+
+        #20;
+        $display("Simulation Completed");
+        $finish;
+
+    end
+
+endmodule
